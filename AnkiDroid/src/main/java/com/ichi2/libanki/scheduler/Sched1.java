@@ -55,7 +55,7 @@ import timber.log.Timber;
 @SuppressWarnings({"PMD.ExcessiveClassLength", "PMD.AvoidThrowingRawExceptionTypes","PMD.AvoidReassigningParameters",
                     "PMD.NPathComplexity","PMD.MethodNamingConventions","PMD.AvoidBranchingStatementAsLastInLoop",
                     "PMD.SwitchStmtsShouldHaveDefault","PMD.CollapsibleIfStatements","PMD.EmptyIfStmt"})
-public class Sched {
+public class Sched1 extends Sched {
 
 
 
@@ -102,35 +102,13 @@ public class Sched {
      * positive revlog intervals are in days (rev), negative in seconds (lrn)
      */
 
-    public Sched(Collection col) {
+    public Sched1(Collection col) {
         mCol = col;
         mQueueLimit = 50;
         mReportLimit = 1000;
         mReps = 0;
         mHaveQueues = false;
         _updateCutoff();
-    }
-
-
-    /**
-     * Pop the next card from the queue. None if finished.
-     */
-    public Card getCard() {
-        _checkDay();
-        if (!mHaveQueues) {
-            reset();
-        }
-        Card card = _getCard();
-        if (card != null) {
-            mCol.log(card);
-            if (!mBurySiblingsOnAnswer) {
-                _burySiblings(card);
-            }
-            mReps += 1;
-            card.startTimer();
-            return card;
-        }
-        return null;
     }
 
 
@@ -251,21 +229,6 @@ public class Sched {
         } else {
             return 3;
         }
-    }
-
-
-    /*
-     * Unbury cards.
-     */
-    public void unburyCards() {
-        try {
-            mCol.getConf().put("lastUnburied", mToday);
-            mCol.log(mCol.getDb().queryColumn(Long.class, "select id from cards where queue = -2", 0));
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        }
-
-        mCol.getDb().execute("update cards set queue=type where queue = -2");
     }
 
 
